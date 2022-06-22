@@ -34,15 +34,15 @@ spec:
           description: Type of the service - https://danfoss.visualstudio.com/Alsense/_wiki/wikis/Infrastructure/19925/RepoNaming?anchor=service-types
           enum: ["shared", "infrastructure", "data-service", "event-service", "presentation-service", "tooling", "jobs"]
         group_id:
-          title: Type
+          title: Group Id
           type: string
           description: Application group id (e.g com.alsense.dataservice)
         artifact_id:
-          title: Type
+          title: Artifact Id
           type: string
           description: Application artifact id (e.g dsi-api)
         service_root_folder:
-          title: Type
+          title: Service root folder
           type: string
           description: Service root folder (e.g com.alsense.dataservice.dsiapi)
         owner:
@@ -61,7 +61,7 @@ spec:
           title: Repository Location
           type: string
           default: ${{ "dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss" }}
-          ui:readonly: true
+         # ui:readonly: true
         #  ui:field: RepoUrlPicker
         #  ui:options:
         #    allowedHosts:
