@@ -1,0 +1,108 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: quarkus-template
+  title: Alsense Quarkus Service Template
+  description: Create a quarkus project with minimal setup
+  tags:
+    - recommended
+    - java
+    - quarkus
+spec:
+  owner: alsense/devops
+  type: service
+
+  parameters:
+    - title: Meta Data
+      required:
+        - service_name
+        - service_type
+        - group_id
+        - artifact_id
+        - service_root_folder
+        - owner
+      properties:
+        service_name:
+          title: Name
+          type: string
+          description: Unique name of the component, MUST follow kebab-case ('-')
+          ui:field: EntityNamePicker
+          ui:autofocus: true
+        service_type:
+          title: Type
+          type: string
+          description: Type of the service - https://danfoss.visualstudio.com/Alsense/_wiki/wikis/Infrastructure/19925/RepoNaming?anchor=service-types
+          enum: ["shared", "infrastructure", "data-service", "event-service", "presentation-service", "tooling", "jobs"]
+        group_id:
+          title: Type
+          type: string
+          description: Application group id (e.g com.alsense.dataservice)
+        artifact_id:
+          title: Type
+          type: string
+          description: Application artifact id (e.g dsi-api)
+        service_root_folder:
+          title: Type
+          type: string
+          description: Service root folder (e.g com.alsense.dataservice.dsiapi)
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            allowedKinds:
+              - Group
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          default: ${{ "dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss" }}
+          ui:readonly: true
+        #  ui:field: RepoUrlPicker
+        #  ui:options:
+        #    allowedHosts:
+        #      - dev.azure.com
+        #    allowedOwners:
+        #      - Alsense
+
+  steps:
+    - id: fetch
+      name: Template Skeleton
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          service_name: ${{ parameters.service_name }}
+          group_id: ${{ parameters.group_id }}
+          artifact_id: ${{ parameters.artifact_id }}
+          service_root_folder: ${{ parameters.service_root_folder }}
+          destination: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss") | parseRepoUrl }}
+          owner: ${{ parameters.owner }}
+
+    - id: publish
+      name: Publish
+      action: publish:azure
+      input:
+#        allowedHosts: ['dev.azure.com']
+        description: 'This is {{ parameters.service_name }}'
+        defaultBranch: 'develop'
+        repoUrl: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss") }}
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{"https://dev.azure.com/danfoss/Alsense/_git/" + (("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.name + "&organization=Danfoss") | parseRepoUrl)["repo"] }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
