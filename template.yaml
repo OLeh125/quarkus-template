@@ -16,10 +16,11 @@ spec:
     - title: Meta Data
       required:
         - service_name
+        - service_short_name
         - service_type
+        - service_type_dir
         - group_id
         - artifact_id
-        - service_root_folder
         - owner
       properties:
         service_name:
@@ -54,7 +55,7 @@ spec:
           type: string
           description: Owner of the component
           ui:field: OwnerPicker
-        
+
     - title: Choose a location
       required:
         - repoUrl
