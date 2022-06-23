@@ -1,0 +1,9 @@
+package ${{"com.alsense." + values.service_type_dir + "." + values.service_short_name}}.exception;
+
+public class InvalidValueException extends RuntimeException {
+
+    public InvalidValueException(String message) {
+        super(message);
+    }
+
+}

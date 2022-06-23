@@ -25,26 +25,30 @@ spec:
         service_name:
           title: Name
           type: string
-          description: Unique name of the component, MUST follow kebab-case ('-')
+          description: Unique name of the component, MUST follow kebab-case (e.g. dsi-api)
           ui:field: EntityNamePicker
           ui:autofocus: true
+        service_short_name:
+          title: Short Name
+          type: string
+          description: Short name. Should be valid directory name (e.g. dsiapi)
         service_type:
           title: Type
           type: string
           description: Type of the service - https://danfoss.visualstudio.com/Alsense/_wiki/wikis/Infrastructure/19925/RepoNaming?anchor=service-types
           enum: ["shared", "infrastructure", "data-service", "event-service", "presentation-service", "tooling", "jobs"]
+        service_type_dir:
+          title: Type Directory
+          type: string
+          enum: [ "shared", "infrastructure", "dataservice", "eventservice", "presentationservice", "tooling", "jobs" ]
         group_id:
           title: Group Id
           type: string
-          description: Application group id (e.g com.alsense.dataservice)
+          description: Application group id (e.g. com.alsense.dataservice)
         artifact_id:
           title: Artifact Id
           type: string
-          description: Application artifact id (e.g dsi-api)
-        service_root_folder:
-          title: Service root folder
-          type: string
-          description: Service root folder (e.g com.alsense.dataservice.dsiapi)
+          description: Application artifact id (e.g. dsi-api)
         owner:
           title: Owner
           type: string
@@ -60,14 +64,8 @@ spec:
         repoUrl:
           title: Repository Location
           type: string
-          default: ${{ "dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss" }}
-         # ui:readonly: true
-        #  ui:field: RepoUrlPicker
-        #  ui:options:
-        #    allowedHosts:
-        #      - dev.azure.com
-        #    allowedOwners:
-        #      - Alsense
+          default: ${{ "dev.azure.com?owner=Alsense&repo=alsense." + parameters.service_type + "." + parameters.service_name + "&organization=Danfoss" }}
+          ui:readonly: true
 
   steps:
     - id: fetch
@@ -77,26 +75,27 @@ spec:
         url: ./skeleton
         values:
           service_name: ${{ parameters.service_name }}
+          service_short_name: ${{ parameters.service_short_name }}
+          service_type_dir: ${{ parameters.service_type_dir }}
           group_id: ${{ parameters.group_id }}
           artifact_id: ${{ parameters.artifact_id }}
-          service_root_folder: ${{ parameters.service_root_folder }}
-          destination: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss") | parseRepoUrl }}
+          destination: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.service_type + "." + parameters.service_name + "&organization=Danfoss") | parseRepoUrl }}
           owner: ${{ parameters.owner }}
 
     - id: publish
       name: Publish
       action: publish:azure
       input:
-#        allowedHosts: ['dev.azure.com']
+        allowedHosts: ['dev.azure.com']
         description: 'This is {{ parameters.service_name }}'
         defaultBranch: 'develop'
-        repoUrl: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.service_name + "&organization=Danfoss") }}
+        repoUrl: ${{ ("dev.azure.com?owner=Alsense&repo=alsense." + parameters.service_type + "." + parameters.service_name + "&organization=Danfoss") }}
 
     - id: register
       name: Register
       action: catalog:register
       input:
-        repoContentsUrl: ${{"https://dev.azure.com/danfoss/Alsense/_git/" + (("dev.azure.com?owner=Alsense&repo=alsense." + parameters.servicetype + "." + parameters.name + "&organization=Danfoss") | parseRepoUrl)["repo"] }}
+        repoContentsUrl: ${{"https://dev.azure.com/danfoss/Alsense/_git/" + (("dev.azure.com?owner=Alsense&repo=alsense." + parameters.service_type + "." + parameters.name + "&organization=Danfoss") | parseRepoUrl)["repo"] }}
         catalogInfoPath: "/catalog-info.yaml"
 
   output:
